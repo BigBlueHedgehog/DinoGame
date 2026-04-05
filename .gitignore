@@ -22,3 +22,5 @@ npm-debug.log*
 # Сгенерированные иконки (можно перегенерировать)
 assets/*.ico
 assets/*.icns
+
+.qwen/
