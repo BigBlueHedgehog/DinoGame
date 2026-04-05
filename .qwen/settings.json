@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir *)",
+      "Bash(python3 *)",
+      "Bash(npm install)",
+      "Bash(timeout *)",
+      "Bash(true)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(sleep *)",
+      "Bash(kill *)",
+      "Bash(/home/yulyak/vscodeprojects/dinosour_game/node_modules/electron/dist/electron *)",
+      "Bash(rm *)",
+      "Bash(cp *)"
+    ]
+  },
+  "$version": 3
+}

@@ -1,0 +1,24 @@
+# Зависимости
+node_modules/
+
+# Дистрибутивы
+dist/
+out/
+
+# Файлы ОС
+.DS_Store
+Thumbs.db
+
+# Логи
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Сгенерированные иконки (можно перегенерировать)
+assets/*.ico
+assets/*.icns

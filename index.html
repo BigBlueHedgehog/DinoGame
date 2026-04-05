@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; media-src 'self'; img-src 'self' data: blob:">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Runner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Основной контейнер игры -->
+  <div id="game-wrapper">
+
+    <!-- Игровое поле -->
+    <div id="game-container">
+
+      <!-- Canvas для отрисовки игры -->
+      <canvas id="game-canvas"></canvas>
+
+      <!-- UI: счёт -->
+      <div id="score-display">
+        <span id="score">0</span>
+      </div>
+
+      <!-- UI: лучший результат -->
+      <div id="highscore-display">
+        <span id="highscore">BEST 0000</span>
+      </div>
+
+      <!-- Экран старта -->
+      <div id="start-screen" class="overlay">
+        <h1>DINO RUNNER</h1>
+        <p class="blink">Press Space to Start</p>
+      </div>
+
+      <!-- Экран Game Over -->
+      <div id="gameover-screen" class="overlay hidden">
+        <h1>GAME OVER</h1>
+        <p>Score: <span id="final-score">0</span></p>
+        <p class="blink">Press Space to Restart</p>
+      </div>
+
+      <!-- Кнопка переключения день/ночь -->
+      <button id="daynight-btn" class="daynight-btn" title="День/Ночь">🌙</button>
+
+      <!-- Кнопка вкл/выкл музыки -->
+      <button id="music-toggle-btn" class="music-btn music-toggle-btn" title="Вкл/Выкл музыку">
+        <img src="assets/icon-music-off.png" alt="Music" class="music-icon" id="music-toggle-icon">
+      </button>
+
+      <!-- Кнопка смены трека -->
+      <button id="music-next-btn" class="music-btn music-next-btn" title="Следующий трек">
+        <img src="assets/icon-next.png" alt="Next" class="music-icon" id="music-next-icon">
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Подключаем логику игры -->
+  <script src="renderer.js"></script>
+
+</body>
+</html>

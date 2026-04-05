@@ -1,0 +1,259 @@
+/**
+ * style.css — Стилизация игры
+ * Минималистичный дизайн: чёрный, белый и акцентный цвет (оранжевый)
+ */
+
+/* ========================
+   Сброс и базовые стили
+   ======================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1a1a2e; /* Тёмный фон за пределами игры */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Courier New', Courier, monospace;
+  user-select: none; /* Запрет выделения текста */
+}
+
+/* ========================
+   Обёртка игры
+   ======================== */
+
+#game-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-container {
+  position: relative;
+  width: 1200px;
+  height: 600px;
+  overflow: hidden;
+  border: 3px solid #333;
+  border-radius: 6px;
+  transition: background-color 1s ease;
+}
+
+/* День / Ночь */
+#game-container.day {
+  background-color: #f7f7f7;
+}
+
+#game-container.night {
+  background-color: #1a1a2e;
+}
+
+/* ========================
+   Canvas
+   ======================== */
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ========================
+   UI элементы
+   ======================== */
+
+#score-display {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  transition: color 1s ease;
+}
+
+#game-container.night #score-display {
+  color: #e0e0e0;
+}
+
+#highscore-display {
+  position: absolute;
+  top: 20px;
+  right: 200px;
+  font-size: 24px;
+  color: #888;
+  transition: color 1s ease;
+}
+
+#game-container.night #highscore-display {
+  color: #666;
+}
+
+/* Кнопка день/ночь */
+.daynight-btn {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  transition: background-color 0.3s ease, transform 0.15s ease;
+  outline: none;
+  line-height: 1;
+}
+
+.daynight-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.daynight-btn:active {
+  transform: scale(0.95);
+}
+
+/* ========================
+   Кнопки управления музыкой
+   ======================== */
+
+.music-btn {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  transition: background-color 0.3s ease, transform 0.15s ease;
+  outline: none;
+  line-height: 1;
+  padding: 0;
+}
+
+.music-btn:hover {
+  background-color: rgba(128, 128, 128, 0.15);
+  transform: scale(1.1);
+}
+
+.music-btn:active {
+  transform: scale(0.95);
+}
+
+/* Иконки внутри кнопок музыки */
+.music-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(53%); /* Серый, как Best Score (#888) */
+  transition: filter 1s ease;
+  pointer-events: none;
+}
+
+/* В тёмной теме — цвет как Best Score в ночи (#666) */
+#game-container.night .music-icon {
+  filter: brightness(0) saturate(100%) invert(40%);
+}
+
+/* Кнопка вкл/выкл музыки — справа сверху, рядом со счётом */
+.music-toggle-btn {
+  top: 11px;
+  right: 365px;
+}
+
+/* Кнопка следующего трека */
+.music-next-btn {
+  top: 11px;
+  right: 410px;
+}
+
+/* ========================
+   Оверлеи (стартовый экран, Game Over)
+   ======================== */
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+
+.overlay h1 {
+  font-size: 64px;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+  letter-spacing: 6px;
+}
+
+.overlay p {
+  font-size: 26px;
+  color: #ccc;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+/* Мигающий текст */
+.blink {
+  animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ========================
+   Game Over: финальный счёт
+   ======================== */
+
+#gameover-screen p {
+  margin: 8px 0;
+}
+
+#final-score {
+  font-size: 36px;
+  color: #f39c12;
+  font-weight: bold;
+}
+
+/* ========================
+   Тряска экрана при Game Over
+   ======================== */
+
+.shake {
+  animation: shake 0.4s ease-out;
+}
+
+@keyframes shake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-12px, 6px); }
+  40%  { transform: translate(9px, -9px); }
+  60%  { transform: translate(-6px, 3px); }
+  80%  { transform: translate(3px, -3px); }
+  100% { transform: translate(0, 0); }
+}
