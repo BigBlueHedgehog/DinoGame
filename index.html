@@ -32,6 +32,7 @@
       <div id="start-screen" class="overlay">
         <h1>DINO RUNNER</h1>
         <p class="blink">Press Space to Start</p>
+        <p class="skin-select-text">Press R to Choose Skin</p>
       </div>
 
       <!-- Экран Game Over -->
@@ -39,6 +40,20 @@
         <h1>GAME OVER</h1>
         <p>Score: <span id="final-score">0</span></p>
         <p class="blink">Press Space to Restart</p>
+        <p class="skin-select-text">Press R to Choose Skin</p>
+      </div>
+
+      <!-- Экран выбора скина -->
+      <div id="skinselect-screen" class="overlay skinselect-overlay hidden">
+        <div class="skinselect-container">
+          <button id="skin-prev-btn" class="skin-arrow-btn" title="Предыдущий скин">◀</button>
+          <div class="skin-preview">
+            <canvas id="skin-preview-canvas" width="151" height="202"></canvas>
+          </div>
+          <button id="skin-next-btn" class="skin-arrow-btn" title="Следующий скин">▶</button>
+        </div>
+        <p class="skin-select-hint">Press Space to Start</p>
+        <p class="skin-select-r-text">Press R to Play</p>
       </div>
 
       <!-- Кнопка переключения день/ночь -->

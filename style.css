@@ -217,6 +217,79 @@ body {
   display: none;
 }
 
+/* ========================
+   Экран выбора скина
+   ======================== */
+
+.skinselect-overlay {
+  justify-content: center;
+}
+
+.skinselect-container {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.skin-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#skin-preview-canvas {
+  width: 127px;  /* 151 * 0.84 */
+  height: 170px; /* 202 * 0.84 */
+  image-rendering: auto;
+}
+
+.skin-arrow-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.15s ease;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.skin-arrow-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: scale(1.15);
+}
+
+.skin-arrow-btn:active {
+  transform: scale(0.85);
+}
+
+.skin-select-hint {
+  font-size: 26px;
+  color: #ccc;
+  margin-top: 10px;
+}
+
+/* Текст выбора скина на стартовом/Game Over экранах */
+.skin-select-text {
+  font-size: 18px;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* Текст на экране выбора скина */
+.skin-select-r-text {
+  font-size: 16px;
+  color: #888;
+  margin-top: 6px;
+}
+
 /* Мигающий текст */
 .blink {
   animation: blink 1.2s infinite;

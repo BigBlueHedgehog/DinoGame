@@ -141,7 +141,10 @@ const scoreElement = document.getElementById('score');
 const highscoreElement = document.getElementById('highscore');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
+const skinSelectScreen = document.getElementById('skinselect-screen');
 const finalScoreElement = document.getElementById('final-score');
+const skinPreviewCanvas = document.getElementById('skin-preview-canvas');
+const skinPreviewCtx = skinPreviewCanvas.getContext('2d');
 
 // Устанавливаем внутреннее разрешение canvas
 canvas.width = 1200;
@@ -163,43 +166,134 @@ const OBSTACLE_MIN_GAP = 90;   // Минимальное расстояние м
 // Состояние игры
 // ========================
 
-let gameState = 'start'; // 'start' | 'playing' | 'gameover'
+let gameState = 'start'; // 'start' | 'playing' | 'gameover' | 'skinSelect'
 let score = 0;
 let highScore = parseInt(localStorage.getItem('dinoHighScore')) || 0;
 let gameSpeed = INITIAL_SPEED;
 let frameCount = 0;        // Счётчик кадров для генерации препятствий
 let isNight = false;
 let lastObstacleY = 0;     // Для отслеживания последнего препятствия
+let selectedSkin = parseInt(localStorage.getItem('selectedSkin')) || 0; // Выбранный скин
+let currentSkin = selectedSkin; // Текущий отображаемый скин в меню
 
 // ========================
-// Игрок (гусь — спрайт из duck.png)
+// Игрок (гусь — спрайт из sprites/)
 // ========================
 
-// Загружаем спрайт гуся (отражённый, без фона)
-const duckSprite = new Image();
-duckSprite.src = 'duck.png';
+// Массив скинов: путь, оригинальные размеры
+const SKIN_SKINS = [
+  { path: 'sprites/duck.png',                     w: 151, h: 202 },
+  { path: 'sprites/duck1.png',                    w: 285, h: 285 },
+  { path: 'sprites/image-no-background (2).png',  w: 281, h: 281 },
+  { path: 'sprites/image-no-background.png',      w: 506, h: 653 },
+  { path: 'sprites/no-background(2).png',         w: 418, h: 418 },
+  { path: 'sprites/no-background(3).png',         w: 212, h: 212 },
+];
 
-// Размеры спрайта
+// Целевая высота отрисовки в игре
+const TARGET_DRAW_H = 100;
+
+// Целевая высота отрисовки в окне выбора скина (превью)
+const TARGET_PREVIEW_H = 120;
+
+// Индивидуальный масштаб для каждого скина
+const skinScales = SKIN_SKINS.map(s => TARGET_DRAW_H / s.h);
+const skinDrawWidths = SKIN_SKINS.map((s, i) => s.w * skinScales[i]);
+const skinDrawHeights = SKIN_SKINS.map(() => TARGET_DRAW_H);
+
+// Хитбокс для каждого скина (процент от нарисованного размера)
+// paddingX/Y — отступы от краёв спрайта до хитбокса (в пикселях отрисовки)
+const skinHitboxes = SKIN_SKINS.map((s, i) => {
+  const dw = skinDrawWidths[i];
+  const dh = skinDrawHeights[i];
+  return {
+    x: Math.round(dw * 0.2),   // 20% слева
+    y: Math.round(dh * 0.05),  // 5% сверху
+    w: Math.round(dw * 0.7),   // 70% ширины
+    h: Math.round(dh * 0.9),   // 90% высоты
+  };
+});
+
+// Базовый размер утки (для совместимости)
 const DUCK_W = 151;
 const DUCK_H = 202;
-const DUCK_SCALE = 0.42; // Масштабирование для canvas
+const DUCK_SCALE = 0.42;
 const DUCK_DRAW_W = DUCK_W * DUCK_SCALE;
 const DUCK_DRAW_H = DUCK_H * DUCK_SCALE;
 
+// Загружаем все спрайты
+const skinSprites = SKIN_SKINS.map(s => {
+  const img = new Image();
+  img.src = s.path;
+  return img;
+});
+
+/** Получить спрайт текущего скина */
+function getCurrentSkinSprite() {
+  return skinSprites[selectedSkin];
+}
+
+/** Получить ширину отрисовки текущего скина */
+function getCurrentSkinDrawW() {
+  return skinDrawWidths[selectedSkin];
+}
+
+/** Получить высоту отрисовки текущего скина */
+function getCurrentSkinDrawH() {
+  return skinDrawHeights[selectedSkin];
+}
+
+/** Получить хитбокс текущего скина */
+function getCurrentSkinHitbox() {
+  return skinHitboxes[selectedSkin];
+}
+
+/** Получить хитбокс скина по индексу */
+function getSkinHitbox(index) {
+  return skinHitboxes[index];
+}
+
+/** Получить ширину отрисовки скина по индексу */
+function getSkinDrawW(index) {
+  return skinDrawWidths[index];
+}
+
+/** Получить высоту отрисовки скина по индексу */
+function getSkinDrawH(index) {
+  return skinDrawHeights[index];
+}
+
 const player = {
-  x: 80,                    // Позиция X (фиксирована)
-  y: GROUND_Y - DUCK_DRAW_H - 4, // Позиция Y (подгоняем под размер спрайта)
+  x: 80,                    // Позиция X верха спрайта (фиксирована)
+  // y будет установлен в reset() — позиция верха спрайта
+  y: GROUND_Y - TARGET_DRAW_H,
   width: 66,                // Ширина хитбокса
-  height: DUCK_DRAW_H + 4,  // Высота хитбокса
+  height: TARGET_DRAW_H,    // Высота хитбокса
   velocityY: 0,
   isJumping: false,
   color: '#F5DEB3',         // Бежевый (для частиц)
 
+  /** Получить высоту текущего скина */
+  getDrawHeight() {
+    return getCurrentSkinDrawH();
+  },
+
+  /** Получить ширину текущего скина */
+  getDrawWidth() {
+    return getCurrentSkinDrawW();
+  },
+
   /** Сброс состояния игрока */
   reset() {
-    this.y = GROUND_Y - DUCK_DRAW_H - 4;
+    const drawH = this.getDrawHeight();
+    const hb = getCurrentSkinHitbox();
+    // y — позиция ВЕРХНЕГО КРАЯ спрайта (не хитбокса)
+    this.y = GROUND_Y - drawH;
     this.velocityY = 0;
     this.isJumping = false;
+    // Хитбокс рассчитывается отдельно
+    this.width = hb.w;
+    this.height = hb.h;
   },
 
   /** Прыжок */
@@ -215,22 +309,26 @@ const player = {
   update() {
     this.velocityY += GRAVITY;
     this.y += this.velocityY;
-    if (this.y >= GROUND_Y - DUCK_DRAW_H - 4) {
-      this.y = GROUND_Y - DUCK_DRAW_H - 4;
+    const drawH = this.getDrawHeight();
+    const groundY = GROUND_Y - drawH;
+    if (this.y >= groundY) {
+      this.y = groundY;
       this.velocityY = 0;
       this.isJumping = false;
     }
   },
 
-  /** Отрисовка спрайта гуся */
+  /** Отрисовка спрайта персонажа */
   draw() {
     const isJump = this.isJumping;
+    const drawW = this.getDrawWidth();
+    const drawH = this.getDrawHeight();
 
     // Подпрыгивание при беге
     const bounce = isJump ? 0 : Math.sin(frameCount * 0.2) * 3;
 
-    // Лёгкое покачивание клюва
-    const beakWobble = isJump ? 0 : Math.sin(frameCount * 0.15) * 2;
+    // Лёгкое покачивание
+    const wobble = isJump ? 0 : Math.sin(frameCount * 0.15) * 2;
 
     ctx.save();
 
@@ -239,30 +337,31 @@ const player = {
     ctx.shadowBlur = 8;
 
     // Позиция отрисовки
-    const drawX = this.x + 2 + beakWobble;
+    const drawX = this.x + 2 + wobble;
     const drawY = this.y + bounce;
 
     // Рисуем спрайт
-    if (duckSprite.complete && duckSprite.naturalWidth > 0) {
-      ctx.drawImage(duckSprite, drawX, drawY, DUCK_DRAW_W, DUCK_DRAW_H);
+    const sprite = getCurrentSkinSprite();
+    if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+      ctx.drawImage(sprite, drawX, drawY, drawW, drawH);
     } else {
       // Фоллбэк: если спрайт ещё не загрузился — рисуем бежевый прямоугольник
       ctx.fillStyle = '#F5DEB3';
-      ctx.fillRect(drawX, drawY, DUCK_DRAW_W, DUCK_DRAW_H);
+      ctx.fillRect(drawX, drawY, drawW, drawH);
     }
 
     ctx.shadowBlur = 0;
     ctx.restore();
   },
 
-  /** Получить границы столкновения */
+  /** Получить границы столкновения (на основе хитбокса текущего скина) */
   getBounds() {
-    const padding = 6;
+    const hb = getCurrentSkinHitbox();
     return {
-      x: this.x + padding,
-      y: this.y + padding,
-      width: this.width - padding * 2,
-      height: this.height - padding * 2,
+      x: this.x + hb.x,
+      y: this.y + hb.y,
+      width: hb.w,
+      height: hb.h,
     };
   },
 };
@@ -375,8 +474,8 @@ class Particle {
 function spawnJumpParticles() {
   for (let i = 0; i < 8; i++) {
     particles.push(new Particle(
-      player.x + player.width / 2,
-      player.y + player.height,
+      player.x + player.getDrawWidth() / 2,
+      GROUND_Y,
       '#F5DEB3'
     ));
   }
@@ -386,8 +485,8 @@ function spawnJumpParticles() {
 function spawnCollisionParticles() {
   for (let i = 0; i < 20; i++) {
     particles.push(new Particle(
-      player.x + player.width / 2,
-      player.y + player.height / 2,
+      player.x + player.getDrawWidth() / 2,
+      player.y + player.getDrawHeight() / 2,
       '#e74c3c'
     ));
   }
@@ -398,7 +497,7 @@ function spawnRunParticles() {
   if (!player.isJumping && frameCount % 5 === 0) {
     particles.push(new Particle(
       player.x,
-      player.y + player.height,
+      GROUND_Y,
       isNight ? '#555' : '#bbb'
     ));
   }
@@ -565,6 +664,65 @@ function showGameOver() {
   musicManager.playCrash();
 }
 
+/** Отрисовка превью скина на canvas с анимацией */
+function drawSkinPreview() {
+  skinPreviewCtx.clearRect(0, 0, skinPreviewCanvas.width, skinPreviewCanvas.height);
+
+  const sprite = skinSprites[currentSkin];
+  if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+    const targetDrawH = TARGET_PREVIEW_H;
+    const scale = targetDrawH / SKIN_SKINS[currentSkin].h;
+    const w = SKIN_SKINS[currentSkin].w * scale;
+    const h = targetDrawH;
+
+    // Анимация подпрыгивания
+    const bounce = Math.sin(frameCount * 0.08) * 6;
+    // Покачивание
+    const wobble = Math.sin(frameCount * 0.06) * 1.5;
+
+    const baseY = skinPreviewCanvas.height / 2 - h / 2 + bounce;
+    const drawY = baseY;
+    const drawX = (skinPreviewCanvas.width - w) / 2 + wobble;
+
+    // Подсветка (свечение)
+    skinPreviewCtx.save();
+    skinPreviewCtx.shadowColor = '#F5DEB3';
+    skinPreviewCtx.shadowBlur = 15 + Math.sin(frameCount * 0.1) * 5;
+
+    skinPreviewCtx.drawImage(sprite, drawX, drawY, w, h);
+
+    skinPreviewCtx.shadowBlur = 0;
+    skinPreviewCtx.restore();
+  }
+}
+
+/** Показать экран выбора скина */
+function showSkinSelect() {
+  gameState = 'skinSelect';
+  currentSkin = selectedSkin; // Начинаем с текущего выбранного
+  skinSelectScreen.classList.remove('hidden');
+  startScreen.classList.add('hidden');
+  gameoverScreen.classList.add('hidden');
+  drawSkinPreview();
+}
+
+/** Скрыть экран выбора скина */
+function hideSkinSelect() {
+  skinSelectScreen.classList.add('hidden');
+}
+
+/** Сменить скин вперёд */
+function nextSkin() {
+  currentSkin = (currentSkin + 1) % SKIN_SKINS.length;
+  drawSkinPreview();
+}
+
+/** Сменить скин назад */
+function prevSkin() {
+  currentSkin = (currentSkin - 1 + SKIN_SKINS.length) % SKIN_SKINS.length;
+  drawSkinPreview();
+}
+
 function resetGame() {
   // Сброс всех параметров
   score = 0;
@@ -576,6 +734,7 @@ function resetGame() {
   player.reset();
   scoreElement.textContent = '0000';
   gameoverScreen.classList.add('hidden');
+  hideSkinSelect();
   gameState = 'playing';
 
   // Перезапускаем фоновую музыку
@@ -623,15 +782,23 @@ function gameLoop() {
 
     // Обновляем счёт
     updateScore();
+  } else if (gameState === 'skinSelect') {
+    frameCount++;
+    drawSkinPreview();
+    // Не обновляем частицы и препятствия при выборе скина
+    particles = [];
+    obstacles = [];
   }
 
-  // Обновляем и рисуем частицы
-  particles.forEach(p => p.update());
+  // Обновляем и рисуем частицы (только в игре)
+  if (gameState === 'playing') {
+    particles.forEach(p => p.update());
+  }
   particles = particles.filter(p => !p.isDead());
   particles.forEach(p => p.draw());
 
-  // Рисуем землю (останавливается при game over)
-  if (gameState !== 'gameover') {
+  // Рисуем землю (останавливается при game over / skin select)
+  if (gameState === 'playing') {
     drawGround();
   } else {
     drawStaticGround();
@@ -640,10 +807,10 @@ function gameLoop() {
   // Рисуем препятствия
   obstacles.forEach(obs => obs.draw());
 
-  // Рисуем игрока (если не game over)
-  if (gameState !== 'gameover') {
+  // Рисуем игрока (если не game over и не skin select)
+  if (gameState === 'playing' || gameState === 'start') {
     player.draw();
-  } else {
+  } else if (gameState === 'gameover') {
     // Рисуем игрока тусклым при проигрыше
     ctx.globalAlpha = 0.4;
     player.draw();
@@ -660,7 +827,7 @@ function gameLoop() {
 
 /** Обработка нажатий клавиш */
 document.addEventListener('keydown', (e) => {
-  // Пробел — прыжок, старт или рестарт
+  // Пробел — прыжок, старт, рестарт или выбор скина
   if (e.code === 'Space') {
     e.preventDefault(); // Предотвращаем скролл страницы
 
@@ -677,6 +844,42 @@ document.addEventListener('keydown', (e) => {
     } else if (gameState === 'gameover') {
       resetGame();
       player.jump();
+    } else if (gameState === 'skinSelect') {
+      // Применить выбранный скин и начать игру
+      selectedSkin = currentSkin;
+      localStorage.setItem('selectedSkin', selectedSkin);
+      hideSkinSelect();
+      gameState = 'playing';
+      player.jump();
+      musicManager.playBackground();
+    }
+  }
+
+  // R — открыть выбор скина (из start или gameover)
+  if (e.code === 'KeyR') {
+    if (gameState === 'start' || gameState === 'gameover') {
+      showSkinSelect();
+    } else if (gameState === 'skinSelect') {
+      // Если уже в выборе скина — закрыть и начать игру с текущим скином
+      selectedSkin = currentSkin;
+      localStorage.setItem('selectedSkin', selectedSkin);
+      hideSkinSelect();
+      musicManager.init();
+      gameState = 'playing';
+      player.jump();
+      musicManager.playBackground();
+    }
+  }
+
+  // Стрелки влево/вправо — навигация по скинам
+  if (gameState === 'skinSelect') {
+    if (e.code === 'ArrowLeft') {
+      e.preventDefault();
+      prevSkin();
+    }
+    if (e.code === 'ArrowRight') {
+      e.preventDefault();
+      nextSkin();
     }
   }
 
@@ -740,6 +943,20 @@ musicNextBtn.addEventListener('click', (e) => {
   musicManager.nextTrack();
 });
 
+/** Кнопки выбора скина */
+const skinPrevBtn = document.getElementById('skin-prev-btn');
+const skinNextBtn = document.getElementById('skin-next-btn');
+
+skinPrevBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  prevSkin();
+});
+
+skinNextBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  nextSkin();
+});
+
 // ========================
 // Инициализация
 // ========================
@@ -750,6 +967,9 @@ saveHighScore();
 // Устанавливаем начальную тему
 gameContainer.classList.add('day');
 updateDayNightBtn();
+
+// Вызываем reset() игрока, чтобы он встал на пол с правильным размером скина
+player.reset();
 
 // Запускаем игровой цикл
 gameLoop();
