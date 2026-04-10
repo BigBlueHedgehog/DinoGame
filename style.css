@@ -39,10 +39,10 @@ body {
   width: 1200px;
   height: 600px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  border: none;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  transition: background-color 1.2s ease, border-color 1.2s ease;
+  transition: background-color 1.2s ease;
 }
 
 /* ========================
@@ -51,7 +51,6 @@ body {
 
 #game-container.day {
   background: linear-gradient(180deg, #f5f0e8 0%, #e8e0d0 60%, #d4c9b8 100%);
-  border-color: rgba(139, 119, 101, 0.3);
 }
 
 /* ========================
@@ -60,7 +59,6 @@ body {
 
 #game-container.night {
   background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 40%, #16213e 100%);
-  border-color: rgba(100, 120, 180, 0.15);
 }
 
 /* ========================
@@ -285,10 +283,7 @@ body {
   gap: 32px;
   margin-bottom: 40px;
   padding: 24px 40px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
+  /* Убрал фон, бордер и backdrop-filter — теперь чисто и минималистично */
 }
 
 .skin-preview {
@@ -304,31 +299,29 @@ body {
 }
 
 .skin-arrow-btn {
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
   font-size: 22px;
   color: #d0d0e0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   outline: none;
   flex-shrink: 0;
-  backdrop-filter: blur(4px);
 }
 
 .skin-arrow-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.12);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.1);
 }
 
 .skin-arrow-btn:active {
-  transform: scale(0.88);
+  transform: scale(0.9);
 }
 
 .skin-select-hint {

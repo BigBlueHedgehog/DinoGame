@@ -1,11 +1,11 @@
-# 🦕 Dino Runner
+# 🦆 Duck Runner
 
-Десктопная игра в стиле динозаврика из Chrome, созданная на **Electron**.
+Десктопная игра с уткой-бегуном, созданная на **Electron**.
 
 ## Структура проекта
 
 ```
-dinosour_game/
+duck_runner/
 ├── main.js              # Electron main процесс (создание окна, жизненный цикл)
 ├── index.html           # HTML-структура игры
 ├── style.css            # Стили и анимации
@@ -75,12 +75,12 @@ npm run build:linux
 >
 > **2. Сделайте файл исполняемым:**
 > ```bash
-> chmod +x dist/Dino\ Runner*.AppImage
+> chmod +x dist/Duck\ Runner*.AppImage
 > ```
 >
 > **3. Запустите:**
 > ```bash
-> ./dist/Dino\ Runner*.AppImage
+> ./dist/Duck\ Runner*.AppImage
 > ```
 >
 > **Или через графический интерфейс:**
@@ -90,7 +90,7 @@ npm run build:linux
 >
 > **4. Если всё ещё не работает** — запустите с извлечением:
 > ```bash
-> ./dist/Dino\ Runner*.AppImage --appimage-extract-and-run
+> ./dist/Duck\ Runner*.AppImage --appimage-extract-and-run
 > ```
 
 #### Сборка для всех платформ:

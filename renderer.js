@@ -1,5 +1,5 @@
 /**
- * renderer.js — Логика игры Dino Runner
+ * renderer.js — Логика игры Duck Runner
  *
  * Содержит:
  * - Игровой цикл (requestAnimationFrame)
@@ -173,7 +173,7 @@ const OBSTACLE_MIN_GAP = 90;   // Минимальное расстояние м
 
 let gameState = 'start'; // 'start' | 'playing' | 'gameover' | 'skinSelect'
 let score = 0;
-let highScore = parseInt(localStorage.getItem('dinoHighScore')) || 0;
+let highScore = parseInt(localStorage.getItem('duckHighScore')) || 0;
 let gameSpeed = INITIAL_SPEED;
 let frameCount = 0;        // Счётчик кадров для генерации препятствий
 let isNight = false;
@@ -646,7 +646,7 @@ function updateScore() {
 function saveHighScore() {
   if (score > highScore) {
     highScore = score;
-    localStorage.setItem('dinoHighScore', highScore);
+    localStorage.setItem('duckHighScore', highScore);
   }
   highscoreElement.textContent = `BEST ${String(highScore).padStart(4, '0')}`;
 }

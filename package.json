@@ -1,7 +1,7 @@
 {
-  "name": "dino-runner",
+  "name": "duck-runner",
   "version": "1.0.0",
-  "description": "Desktop dinosaur runner game built with Electron",
+  "description": "Desktop duck runner game built with Electron",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -14,7 +14,7 @@
   "keywords": [
     "electron",
     "game",
-    "dino",
+    "duck",
     "runner"
   ],
   "author": "",
@@ -25,8 +25,8 @@
     "electron-reload": "^2.0.0-alpha.1"
   },
   "build": {
-    "appId": "com.dino.runner",
-    "productName": "Dino Runner",
+    "appId": "com.duck.runner",
+    "productName": "Duck Runner",
     "directories": {
       "output": "dist"
     },
