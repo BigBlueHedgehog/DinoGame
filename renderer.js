@@ -105,7 +105,11 @@ const musicManager = {
   /** Звук столкновения — мягкий приглушённый тон */
   playCrash() {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Переиспользуем AudioContext вместо создания нового
+      if (!this.crashCtx) {
+        this.crashCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = this.crashCtx;
       const now = ctx.currentTime;
 
       // Мягкий низкочастотный тон (sine, не sawtooth)
@@ -113,17 +117,17 @@ const musicManager = {
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(200, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.5);
 
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.4);
+      osc.stop(now + 0.5);
     } catch (e) {}
 
     // Останавливаем всю музыку при столкновении
@@ -186,12 +190,12 @@ let debugHitbox = false;   // Отладка хитбоксов (F1)
 // Формат hitbox: { x: % слева, y: % сверху, w: % ширины, h: % высоты }
 // Если hitbox не указан — используется значение по умолчанию { x: 0.2, y: 0.05, w: 0.7, h: 0.9 }
 const SKIN_SKINS = [
-  { path: 'sprites/duck.png',                     w: 151, h: 202, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
-  { path: 'sprites/duck1.png',                    w: 285, h: 285, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
-  { path: 'sprites/image-no-background (2).png',  w: 281, h: 281, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
-  { path: 'sprites/image-no-background.png',      w: 506, h: 653, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
-  { path: 'sprites/no-background(2).png',         w: 418, h: 418, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
-  { path: 'sprites/no-background(3).png',         w: 212, h: 212, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/duck_optimized.png',                w: 75,  h: 101, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
+  { path: 'sprites/duck1_optimized.png',               w: 142, h: 142, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/image-no-background (2)_optimized.png', w: 140, h: 140, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/image-no-background_optimized.png', w: 253, h: 326, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
+  { path: 'sprites/no-background(2)_optimized.png',    w: 209, h: 209, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/no-background(3)_optimized.png',    w: 106, h: 106, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
 ];
 
 // Хитбокс по умолчанию (если не указан у скина)
@@ -337,15 +341,13 @@ const player = {
     // Лёгкое покачивание
     const wobble = isJump ? 0 : Math.sin(frameCount * 0.15) * 2;
 
-    ctx.save();
-
-    // Тень/свечение
-    ctx.shadowColor = '#F5DEB3';
-    ctx.shadowBlur = 8;
-
     // Позиция отрисовки
     const drawX = this.x + 2 + wobble;
     const drawY = this.y + bounce;
+
+    // Свечение (лёгкое, не ресурсоёмкое)
+    ctx.shadowColor = '#F5DEB3';
+    ctx.shadowBlur = 6;
 
     // Рисуем спрайт
     const sprite = getCurrentSkinSprite();
@@ -358,7 +360,6 @@ const player = {
     }
 
     ctx.shadowBlur = 0;
-    ctx.restore();
   },
 
   /** Получить границы столкновения (на основе хитбокса текущего скина) */
@@ -388,7 +389,7 @@ class Obstacle {
     this.height = 30 + Math.random() * 45;     // Случайная высота (30–75)
     this.x = canvas.width;                      // Появляется справа
     this.y = GROUND_Y - this.height;            // Стоит на земле
-    this.color = isNight ? '#e74c3c' : '#2c3e50';
+    this.color = isNight ? '#6c7ae0' : '#8b6f51';
     this.passed = false; // Флаг: пройден ли игроком
   }
 
@@ -403,7 +404,7 @@ class Obstacle {
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
     // Деталь — полоска сверху
-    ctx.fillStyle = isNight ? '#c0392b' : '#34495e';
+    ctx.fillStyle = isNight ? '#5a68c0' : '#a08060';
     ctx.fillRect(this.x + 3, this.y + 3, this.width - 6, 4);
   }
 
@@ -479,33 +480,33 @@ class Particle {
 
 /** Частицы при прыжке */
 function spawnJumpParticles() {
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 5; i++) {
     particles.push(new Particle(
       player.x + player.getDrawWidth() / 2,
       GROUND_Y,
-      '#F5DEB3'
+      isNight ? '#8a8ae0' : '#c8b8a0'
     ));
   }
 }
 
 /** Частицы при столкновении */
 function spawnCollisionParticles() {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 12; i++) {
     particles.push(new Particle(
       player.x + player.getDrawWidth() / 2,
       player.y + player.getDrawHeight() / 2,
-      '#e74c3c'
+      '#e74c5c'
     ));
   }
 }
 
 /** Частицы "бег" (пыль из-под ног) */
 function spawnRunParticles() {
-  if (!player.isJumping && frameCount % 5 === 0) {
+  if (!player.isJumping && frameCount % 8 === 0) {
     particles.push(new Particle(
       player.x,
       GROUND_Y,
-      isNight ? '#555' : '#bbb'
+      isNight ? '#4a4a6a' : '#b0a090'
     ));
   }
 }
@@ -520,8 +521,8 @@ let groundOffset = 0;
  * Отрисовка земли с движущейся текстурой
  */
 function drawGround() {
-  const groundColor = isNight ? '#2c3e50' : '#95a5a6';
-  const lineColor = isNight ? '#34495e' : '#bdc3c7';
+  const groundColor = isNight ? '#3a3a5c' : '#a89888';
+  const lineColor = isNight ? '#4a4a6a' : '#b8a898';
 
   // Основная линия земли
   ctx.strokeStyle = groundColor;
@@ -545,8 +546,8 @@ function drawGround() {
  * Отрисовка земли без движения (при Game Over)
  */
 function drawStaticGround() {
-  const groundColor = isNight ? '#2c3e50' : '#95a5a6';
-  const lineColor = isNight ? '#34495e' : '#bdc3c7';
+  const groundColor = isNight ? '#3a3a5c' : '#a89888';
+  const lineColor = isNight ? '#4a4a6a' : '#b8a898';
 
   // Основная линия земли
   ctx.strokeStyle = groundColor;
@@ -570,7 +571,7 @@ function drawStaticGround() {
 function drawStars() {
   if (!isNight) return;
 
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = '#e0e0ff';
   // Используем псевдослучайные позиции на основе кадра
   const starPositions = [
     [120, 50], [340, 80], [560, 40], [680, 90],
@@ -691,10 +692,10 @@ function drawSkinPreview() {
     const drawY = baseY;
     const drawX = (skinPreviewCanvas.width - w) / 2 + wobble;
 
-    // Подсветка (свечение)
+    // Свечение (анимированное, пульсирующее)
     skinPreviewCtx.save();
     skinPreviewCtx.shadowColor = '#F5DEB3';
-    skinPreviewCtx.shadowBlur = 15 + Math.sin(frameCount * 0.1) * 5;
+    skinPreviewCtx.shadowBlur = 12 + Math.sin(frameCount * 0.08) * 3;
 
     skinPreviewCtx.drawImage(sprite, drawX, drawY, w, h);
 
@@ -760,7 +761,7 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Рисуем фон (звёзды ночью)
-  drawStars();
+  if (isNight) drawStars();
 
   if (gameState === 'playing') {
     frameCount++;
@@ -773,10 +774,12 @@ function gameLoop() {
     spawnObstacle();
 
     // Обновляем препятствия
-    obstacles.forEach(obs => obs.update());
-
-    // Удаляем ушедшие за экран
-    obstacles = obstacles.filter(obs => !obs.isOffScreen());
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      obstacles[i].update();
+      if (obstacles[i].isOffScreen()) {
+        obstacles.splice(i, 1);
+      }
+    }
 
     // Проверка столкновений
     const playerBounds = player.getBounds();
@@ -789,39 +792,61 @@ function gameLoop() {
 
     // Обновляем счёт
     updateScore();
+
+    // Рисуем землю
+    drawGround();
+
+    // Рисуем препятствия
+    for (const obs of obstacles) {
+      obs.draw();
+    }
+
+    // Рисуем частицы
+    for (let i = particles.length - 1; i >= 0; i--) {
+      particles[i].update();
+      if (particles[i].isDead()) {
+        particles.splice(i, 1);
+      } else {
+        particles[i].draw();
+      }
+    }
+
+    // Рисуем игрока
+    player.draw();
+
   } else if (gameState === 'skinSelect') {
     frameCount++;
     drawSkinPreview();
-    // Не обновляем частицы и препятствия при выборе скина
-    particles = [];
-    obstacles = [];
-  }
-
-  // Обновляем и рисуем частицы (только в игре)
-  if (gameState === 'playing') {
-    particles.forEach(p => p.update());
-  }
-  particles = particles.filter(p => !p.isDead());
-  particles.forEach(p => p.draw());
-
-  // Рисуем землю (останавливается при game over / skin select)
-  if (gameState === 'playing') {
-    drawGround();
-  } else {
     drawStaticGround();
-  }
 
-  // Рисуем препятствия
-  obstacles.forEach(obs => obs.draw());
-
-  // Рисуем игрока (если не game over и не skin select)
-  if (gameState === 'playing' || gameState === 'start') {
-    player.draw();
   } else if (gameState === 'gameover') {
-    // Рисуем игрока тусклым при проигрыше
+    // Рисуем землю
+    drawStaticGround();
+
+    // Рисуем препятствия
+    for (const obs of obstacles) {
+      obs.draw();
+    }
+
+    // Рисуем игрока тусклым
     ctx.globalAlpha = 0.4;
     player.draw();
     ctx.globalAlpha = 1.0;
+
+    // Частицы
+    for (let i = particles.length - 1; i >= 0; i--) {
+      particles[i].update();
+      if (particles[i].isDead()) {
+        particles.splice(i, 1);
+      } else {
+        particles[i].draw();
+      }
+    }
+
+  } else {
+    // start screen
+    drawStaticGround();
+    player.draw();
   }
 
   // Запрашиваем следующий кадр

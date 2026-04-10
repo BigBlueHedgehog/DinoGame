@@ -35,7 +35,9 @@
       "index.html",
       "style.css",
       "renderer.js",
-      "assets/**/*"
+      "assets/**/*",
+      "sprites/**/*",
+      "songs/**/*"
     ],
     "win": {
       "target": "nsis",

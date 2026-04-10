@@ -1,6 +1,6 @@
 /**
  * style.css — Стилизация игры
- * Минималистичный дизайн: чёрный, белый и акцентный цвет (оранжевый)
+ * Премиальная цветовая схема: мягкие тона, градиенты, акценты
  */
 
 /* ========================
@@ -14,14 +14,14 @@
 }
 
 body {
-  background-color: #1a1a2e; /* Тёмный фон за пределами игры */
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   overflow: hidden;
   font-family: 'Courier New', Courier, monospace;
-  user-select: none; /* Запрет выделения текста */
+  user-select: none;
 }
 
 /* ========================
@@ -39,18 +39,28 @@ body {
   width: 1200px;
   height: 600px;
   overflow: hidden;
-  border: 3px solid #333;
-  border-radius: 6px;
-  transition: background-color 1s ease;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: background-color 1.2s ease, border-color 1.2s ease;
 }
 
-/* День / Ночь */
+/* ========================
+   День — мягкий рассвет
+   ======================== */
+
 #game-container.day {
-  background-color: #f7f7f7;
+  background: linear-gradient(180deg, #f5f0e8 0%, #e8e0d0 60%, #d4c9b8 100%);
+  border-color: rgba(139, 119, 101, 0.3);
 }
+
+/* ========================
+   Ночь — глубокий космос
+   ======================== */
 
 #game-container.night {
-  background-color: #1a1a2e;
+  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 40%, #16213e 100%);
+  border-color: rgba(100, 120, 180, 0.15);
 }
 
 /* ========================
@@ -64,7 +74,7 @@ body {
 }
 
 /* ========================
-   UI элементы
+   UI элементы — Счёт
    ======================== */
 
 #score-display {
@@ -73,55 +83,78 @@ body {
   right: 30px;
   font-size: 28px;
   font-weight: bold;
-  color: #333;
-  transition: color 1s ease;
+  color: #2c2c2c;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: color 1.2s ease, text-shadow 1.2s ease;
+  letter-spacing: 2px;
 }
 
 #game-container.night #score-display {
-  color: #e0e0e0;
+  color: #e8e8f0;
+  text-shadow: 0 0 8px rgba(200, 210, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 #highscore-display {
   position: absolute;
   top: 20px;
   right: 200px;
-  font-size: 24px;
-  color: #888;
-  transition: color 1s ease;
+  font-size: 22px;
+  color: #7a7a7a;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  transition: color 1.2s ease, text-shadow 1.2s ease;
+  letter-spacing: 1px;
 }
 
 #game-container.night #highscore-display {
-  color: #666;
+  color: #8a8aa0;
+  text-shadow: 0 0 6px rgba(150, 160, 200, 0.3), 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* Кнопка день/ночь */
+/* ========================
+   Кнопка день/ночь
+   ======================== */
+
 .daynight-btn {
   position: absolute;
-  top: 18px;
-  left: 20px;
-  width: 48px;
-  height: 48px;
-  border: none;
+  top: 16px;
+  left: 18px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(120, 100, 80, 0.25);
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.15);
-  font-size: 28px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 20;
-  transition: background-color 0.3s ease, transform 0.15s ease;
+  transition: all 0.3s ease;
   outline: none;
   line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#game-container.night .daynight-btn {
+  background: rgba(30, 30, 50, 0.6);
+  border-color: rgba(100, 120, 180, 0.25);
+  box-shadow: 0 2px 12px rgba(80, 100, 180, 0.15);
 }
 
 .daynight-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#game-container.night .daynight-btn:hover {
+  background: rgba(40, 40, 70, 0.7);
+  box-shadow: 0 4px 16px rgba(80, 100, 180, 0.25);
 }
 
 .daynight-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 /* ========================
@@ -130,56 +163,68 @@ body {
 
 .music-btn {
   position: absolute;
-  width: 42px;
-  height: 42px;
-  border: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(120, 100, 80, 0.2);
   border-radius: 50%;
-  background-color: transparent;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(4px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 20;
-  transition: background-color 0.3s ease, transform 0.15s ease;
+  transition: all 0.3s ease;
   outline: none;
-  line-height: 1;
   padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#game-container.night .music-btn {
+  background: rgba(30, 30, 50, 0.5);
+  border-color: rgba(100, 120, 180, 0.2);
+  box-shadow: 0 2px 10px rgba(80, 100, 180, 0.15);
 }
 
 .music-btn:hover {
-  background-color: rgba(128, 128, 128, 0.15);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.65);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#game-container.night .music-btn:hover {
+  background: rgba(40, 40, 70, 0.65);
+  box-shadow: 0 4px 14px rgba(80, 100, 180, 0.25);
 }
 
 .music-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 /* Иконки внутри кнопок музыки */
 .music-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: block;
-  filter: brightness(0) saturate(100%) invert(53%); /* Серый, как Best Score (#888) */
-  transition: filter 1s ease;
+  filter: brightness(0) saturate(100%) invert(35%);
+  transition: filter 1.2s ease;
   pointer-events: none;
 }
 
-/* В тёмной теме — цвет как Best Score в ночи (#666) */
 #game-container.night .music-icon {
-  filter: brightness(0) saturate(100%) invert(40%);
+  filter: brightness(0) saturate(100%) invert(75%);
 }
 
 /* Кнопка вкл/выкл музыки — справа сверху, рядом со счётом */
 .music-toggle-btn {
-  top: 11px;
-  right: 365px;
+  top: 18px;
+  right: 360px;
 }
 
 /* Кнопка следующего трека */
 .music-next-btn {
-  top: 11px;
-  right: 410px;
+  top: 18px;
+  right: 408px;
 }
 
 /* ========================
@@ -196,21 +241,29 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(15, 15, 35, 0.85) 0%, rgba(20, 20, 40, 0.9) 100%);
+  backdrop-filter: blur(2px);
   z-index: 10;
 }
 
 .overlay h1 {
-  font-size: 64px;
-  color: #fff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  margin-bottom: 20px;
-  letter-spacing: 6px;
+  font-size: 68px;
+  background: linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 50%, #d4b896 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 8px rgba(245, 230, 211, 0.3));
+  margin-bottom: 24px;
+  letter-spacing: 8px;
+  font-weight: 900;
 }
 
 .overlay p {
-  font-size: 26px;
-  color: #ccc;
+  font-size: 24px;
+  color: #c0c0d0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
 }
 
 .overlay.hidden {
@@ -223,13 +276,19 @@ body {
 
 .skinselect-overlay {
   justify-content: center;
+  background: linear-gradient(180deg, rgba(12, 12, 30, 0.88) 0%, rgba(18, 18, 38, 0.92) 100%);
 }
 
 .skinselect-container {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 32px;
   margin-bottom: 40px;
+  padding: 24px 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
 }
 
 .skin-preview {
@@ -239,65 +298,70 @@ body {
 }
 
 #skin-preview-canvas {
-  width: 127px;  /* 151 * 0.84 */
-  height: 170px; /* 202 * 0.84 */
+  width: 127px;
+  height: 170px;
   image-rendering: auto;
 }
 
 .skin-arrow-btn {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 8px;
-  background-color: transparent;
-  font-size: 24px;
-  color: #fff;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 22px;
+  color: #d0d0e0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease, transform 0.15s ease;
+  transition: all 0.3s ease;
   outline: none;
   flex-shrink: 0;
+  backdrop-filter: blur(4px);
 }
 
 .skin-arrow-btn:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  transform: scale(1.15);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .skin-arrow-btn:active {
-  transform: scale(0.85);
+  transform: scale(0.88);
 }
 
 .skin-select-hint {
-  font-size: 26px;
-  color: #ccc;
-  margin-top: 10px;
+  font-size: 24px;
+  color: #c0c0d0;
+  margin-top: 12px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Текст выбора скина на стартовом/Game Over экранах */
 .skin-select-text {
   font-size: 18px;
-  color: #999;
-  margin-top: 8px;
+  color: #9090a8;
+  margin-top: 10px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Текст на экране выбора скина */
 .skin-select-r-text {
   font-size: 16px;
-  color: #888;
-  margin-top: 6px;
+  color: #808098;
+  margin-top: 8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Мигающий текст */
 .blink {
-  animation: blink 1.2s infinite;
+  animation: blink 1.4s ease-in-out infinite;
 }
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50% { opacity: 0.35; }
 }
 
 /* ========================
@@ -305,13 +369,18 @@ body {
    ======================== */
 
 #gameover-screen p {
-  margin: 8px 0;
+  margin: 10px 0;
 }
 
 #final-score {
-  font-size: 36px;
-  color: #f39c12;
-  font-weight: bold;
+  font-size: 40px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  filter: drop-shadow(0 2px 6px rgba(255, 179, 71, 0.4));
+  letter-spacing: 2px;
 }
 
 /* ========================
@@ -324,9 +393,9 @@ body {
 
 @keyframes shake {
   0%   { transform: translate(0, 0); }
-  20%  { transform: translate(-12px, 6px); }
-  40%  { transform: translate(9px, -9px); }
-  60%  { transform: translate(-6px, 3px); }
-  80%  { transform: translate(3px, -3px); }
+  20%  { transform: translate(-10px, 5px); }
+  40%  { transform: translate(8px, -7px); }
+  60%  { transform: translate(-5px, 3px); }
+  80%  { transform: translate(3px, -2px); }
   100% { transform: translate(0, 0); }
 }
