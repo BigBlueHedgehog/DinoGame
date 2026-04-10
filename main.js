@@ -3,14 +3,18 @@
  * Отвечает за создание окна приложения и управление жизненным циклом
  */
 
-require('electron-reload')(__dirname, {
-  electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
-  hardResetMethod: 'exit',
-  watch: ['main.js']
-});
-
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+
+// Hot-reload только в режиме разработки (не в собранном AppImage)
+const isDev = !app.isPackaged;
+if (isDev) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+    hardResetMethod: 'exit',
+    watch: ['main.js']
+  });
+}
 
 let mainWindow;
 
@@ -19,8 +23,8 @@ let mainWindow;
  */
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,          // Фиксированная ширина
-    height: 400,         // Фиксированная высота
+    width: 1200,         // Фиксированная ширина
+    height: 600,         // Фиксированная высота
     resizable: false,    // Запрет изменения размера
     frame: true,         // Рамка окна (false — совсем без рамки)
     show: false,         // Показываем после загрузки для плавности

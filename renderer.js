@@ -19,6 +19,7 @@ const musicManager = {
   tracks: [
     { name: 'Purple Dream', src: 'songs/Ghostrifter-Official-Purple-Dream(chosic.com).mp3' },
     { name: 'Transcendence', src: 'songs/Transcendence-chosic.com_.mp3' },
+    { name: 'Champagne Coast', src: 'songs/Lewis_Hanton_-_Champagne_Coast_-_Instrumental_79401556.mp3' },
   ],
   currentTrack: parseInt(localStorage.getItem('musicTrack')) || 0,
   isMuted: localStorage.getItem('musicMuted') === 'true',
@@ -175,20 +176,26 @@ let isNight = false;
 let lastObstacleY = 0;     // Для отслеживания последнего препятствия
 let selectedSkin = parseInt(localStorage.getItem('selectedSkin')) || 0; // Выбранный скин
 let currentSkin = selectedSkin; // Текущий отображаемый скин в меню
+let debugHitbox = false;   // Отладка хитбоксов (F1)
 
 // ========================
 // Игрок (гусь — спрайт из sprites/)
 // ========================
 
-// Массив скинов: путь, оригинальные размеры
+// Массив скинов: путь, оригинальные размеры, хитбокс (в процентах)
+// Формат hitbox: { x: % слева, y: % сверху, w: % ширины, h: % высоты }
+// Если hitbox не указан — используется значение по умолчанию { x: 0.2, y: 0.05, w: 0.7, h: 0.9 }
 const SKIN_SKINS = [
-  { path: 'sprites/duck.png',                     w: 151, h: 202 },
-  { path: 'sprites/duck1.png',                    w: 285, h: 285 },
-  { path: 'sprites/image-no-background (2).png',  w: 281, h: 281 },
-  { path: 'sprites/image-no-background.png',      w: 506, h: 653 },
-  { path: 'sprites/no-background(2).png',         w: 418, h: 418 },
-  { path: 'sprites/no-background(3).png',         w: 212, h: 212 },
+  { path: 'sprites/duck.png',                     w: 151, h: 202, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
+  { path: 'sprites/duck1.png',                    w: 285, h: 285, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/image-no-background (2).png',  w: 281, h: 281, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/image-no-background.png',      w: 506, h: 653, hitbox: { x: 0.15, y: 0.02, w: 0.75, h: 0.95 } },
+  { path: 'sprites/no-background(2).png',         w: 418, h: 418, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
+  { path: 'sprites/no-background(3).png',         w: 212, h: 212, hitbox: { x: 0.20, y: 0.05, w: 0.70, h: 0.90 } },
 ];
+
+// Хитбокс по умолчанию (если не указан у скина)
+const DEFAULT_HITBOX = { x: 0.20, y: 0.05, w: 0.70, h: 0.90 };
 
 // Целевая высота отрисовки в игре
 const TARGET_DRAW_H = 100;
@@ -201,16 +208,16 @@ const skinScales = SKIN_SKINS.map(s => TARGET_DRAW_H / s.h);
 const skinDrawWidths = SKIN_SKINS.map((s, i) => s.w * skinScales[i]);
 const skinDrawHeights = SKIN_SKINS.map(() => TARGET_DRAW_H);
 
-// Хитбокс для каждого скина (процент от нарисованного размера)
-// paddingX/Y — отступы от краёв спрайта до хитбокса (в пикселях отрисовки)
-const skinHitboxes = SKIN_SKINS.map((s, i) => {
-  const dw = skinDrawWidths[i];
-  const dh = skinDrawHeights[i];
+// Вычисляем хитбоксы в пикселях
+const skinHitboxes = SKIN_SKINS.map((s) => {
+  const hb = s.hitbox || DEFAULT_HITBOX;
+  const dw = skinDrawWidths[SKIN_SKINS.indexOf(s)];
+  const dh = skinDrawHeights[SKIN_SKINS.indexOf(s)];
   return {
-    x: Math.round(dw * 0.2),   // 20% слева
-    y: Math.round(dh * 0.05),  // 5% сверху
-    w: Math.round(dw * 0.7),   // 70% ширины
-    h: Math.round(dh * 0.9),   // 90% высоты
+    x: Math.round(dw * hb.x),
+    y: Math.round(dh * hb.y),
+    w: Math.round(dw * hb.w),
+    h: Math.round(dh * hb.h),
   };
 });
 
